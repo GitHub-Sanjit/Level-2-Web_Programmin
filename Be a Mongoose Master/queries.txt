@@ -1,0 +1,292 @@
+5-3 $eq, $neq, $gt, $lt, $gte, $lte=================
+1.db.test.find({ gender: { $eq: "Male" } })
+2.db.test.findOne({ gender: { $eq: "Male" } })
+3.db.test.findOne({ age: { $eq: 12 } })
+4.db.test.find({ age: { $ne: 12 } })
+5.db.test.find({ age: { $gt: 18 } })
+6.db.test.find({ age: { $gt: 30 } })
+7.db.test.find({ age: { $gte: 30 } })
+8.db.test.find({ age: { $gte: 30 } }).sort({ age: 1 })
+====================================================
+
+5-4 $in, $nin, implicit and condition===============
+1.db.test.find({ age: { $lt: 30 } }).sort({ age: 1 })
+2.db.test.find({ age: { $lt: 18} })
+3.db.test.find({ age: { $lt: 18 } }, { age: 1 })
+4.db.test.find({ age: { $gt: 18, $lt: 30 } }, { age: 1 }).sort({ age: 1 })
+5.db.test.find({ age: { $gte: 18, $lte: 30 } }, { age: 1 }).sort({ age: 1 })
+6.db.test.find({ gender: "Female" ,age: { $gt: 18, $lt: 30 } }, { age: 1 }).sort({ age: 1 })
+8.db.test.find({ gender: "Female", age: { $gt: 18, $lt: 30 } }, { age: 1, gender: 1 }).sort({ age: 1 })
+9.db.test.find(
+    { gender: "Female", age: { $in: [18, 20] } }, 
+    { age: 1, gender: 1 })
+    .sort({ age: 1 })
+10.db.test.find(
+    { gender: "Female", age: { $in: [18, 20, 22, 24, 26, 28, 30] } },
+    { age: 1, gender: 1 })
+    .sort({ age: 1 })
+11.db.test.find(
+    { gender: "Female", age: { $nin: [18, 20, 22, 24, 26, 28, 30] } },
+    { age: 1, gender: 1 })
+    .sort({ age: 1 })
+12.db.test.find(
+    {
+        gender: "Female",
+        age: { $nin: [18, 20, 22, 24, 26, 28, 30] },
+        interests: "Cooking"
+    },
+    { age: 1, gender: 1, interests: 1 })
+    .sort({ age: 1 })
+13.db.test.find(
+    {
+        gender: "Female",
+        age: { $nin: [18, 20, 22, 24, 26, 28, 30] },
+        interests: { $in: ["Cooking","Gaming"] }
+    },
+    { age: 1, gender: 1, interests: 1 })
+    .sort({ age: 1 })
+====================================================
+
+5-5 $and, $or, implicit vs explicit=================
+1.db.test.find({ age: { $ne: 15, $lte: 30 } })
+2.// Explicit $and
+db.test.find({
+    $and: [
+        { age: { $ne: 15 } },
+        { age: { $lte: 30 } }
+    ]
+})
+3.db.test.find({
+    $and: [
+        { age: { $ne: 15 } },
+        { age: { $lte: 30 } }
+    ]
+}).project({
+    age: 1
+})
+4.db.test.find({
+    $and: [
+        { age: { $ne: 15 } },
+        { age: { $lte: 30 } }
+    ]
+}).project({
+    age: 1
+}).sort({ age: 1 })
+5.db.test.find({
+    $and: [
+        {gender:"Female"},
+        { age: { $ne: 15 } },
+        { age: { $lte: 30 } }
+    ]
+}).project({
+    age: 1,
+    gender:1
+}).sort({ age: 1 })
+6.db.test.find({
+    $or: [
+        { interests: "Traveling" },
+        { interests: "Cooking" }
+    ]
+}).project({
+    interests: 1
+
+}).sort({ age: 1 })
+7.//Explicite $or
+db.test.find({
+    $or: [
+        { "skills.name": "JAVASCRIPT" },
+        { "skills.name": "PYTHON" }
+    ]
+}).project({
+    skills: 1
+}).sort({ age: 1 })
+8.//Implecite $or
+db.test.find({
+    "skills.name": { $in: ["JAVASCRIPT", "PYTHON"] }
+}).project({
+    skills: 1
+}).sort({ age: 1 })
+====================================================
+
+5-6 $exists, $type,$size============================
+1.db.test.find({ age: { $exists: true } })
+2.db.test.find({ phone: { $exists: false } })
+3.db.test.find({ phone: { $exists: true } })
+4.db.test.find({ unknown: { $exists: true } })
+5.db.test.find({ company: { $exists: true } })
+6.db.test.find({ ase: { $type: "string" } })
+7.db.test.find({ friends: { $type: "array" } })
+8.db.test.find({ friends: { $size: 4 } }).project({ friends: 1 })
+9.db.test.find({ friends: { $size: 5 } }).project({ friends: 1 })
+10.db.test.find({ company: { $type: "null"} }).project({ company: 1 })
+====================================================
+
+5-7 $all , $elemMatch===============================
+1.db.test.find({ interests: "Cooking" }).project({ interests: 1 })
+2.db.test.find({ "interests.2": "Cooking" }).project({ interests: 1 })
+3.db.test.find({ interests: { $all: ["Gardening", "Cooking", "Reading"] } }).project({ interests: 1 })
+4.db.test.find({
+    "skills.name": "JAVASCRIPT"
+})
+    .project({ skills: 1 })
+5.db.test.find({
+    skills: {
+        name: "JAVASCRIPT",
+        level: "Intermidiate",
+        isLearning: false
+    }
+})
+    .project({ skills: 1 })
+6.db.test.find({
+    skills: {
+        $elemMatch: {
+            name: "JAVASCRIPT",
+            level: "Intermidiate"
+        }
+    }
+})
+    .project({ skills: 1 })
+====================================================
+
+5-8 $set, $addToSet, $push==========================
+1.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $set: {
+            age: 85
+        }
+    },
+)
+2.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $set: {
+            interests: "Gaming"
+        }
+    },
+)
+3.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $set: {
+            interests: ["Gaming","Reading","Writing"]
+        }
+    },
+)
+4.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $addToSet: {
+            interests: ["Gaming"]
+        }
+    },
+)
+5.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $addToSet: {
+            interests:{$each: ["Cooking.","Driving"]}
+        }
+    },
+)
+6.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $push: {
+            interests:{$each: ["Cooking.","Driving"]}
+        }
+    },
+)
+====================================================
+
+5-9 $unset, $pop, $pull, $pullAll===================
+1.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $unset: { birthday: "" }
+    })
+2.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $pop: { friends: 1 }
+    })
+3.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $pop: { friends: -1 }
+    })
+4.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $pull: { friends: "Najmus Sakib" }
+    })
+5.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $pull: { languages: "Gujarati" }
+    })
+6.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $pullAll: { interests: [	[ "Gaming", "Cooking", "Driving" ],	[ "Gaming" ], ] }
+    })
+7.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $pullAll: { interests: [ "Driving" ] }
+    })
+====================================================
+
+5-10 More about $set, how to explore documentation=========
+1.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $set: {
+            "address.city": "Dhaka"
+        }
+    })
+2.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $set: {
+            "address.city": "Dhaka",
+            "address.country": "Bangladesh"
+        }
+    })
+3.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7") },
+    {
+        $set: {
+            "address.city": "Dhaka",
+            "address.postalCode": "000000",
+            "address.country": "Bangladesh"
+        }
+    })
+4.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c7"), "education.major": "Philosophy" },
+    {
+        $set: {
+            "education.$.major": "CSE"
+        }
+    })
+5.db.test.updateOne(
+    { _id:  ObjectId("6406ad65fc13ae5a400000c7"), "education.degree": "Associate of Science" },
+    {
+        $set: {
+            "education.$.degree": "Computer Science"
+        }
+    })
+6.db.test.updateOne(
+    { _id: ObjectId("6406ad65fc13ae5a400000c5") },
+    {
+        $inc: {
+            age: 4
+        }
+    })
+===========================================================
+
+5-11 delete documents, drop collection and how to explore by yourself===================
+1.db.test.deleteOne({ _id: ObjectId("6406ad65fc13ae5a400000c7") })
+2.
+========================================================================================
+
