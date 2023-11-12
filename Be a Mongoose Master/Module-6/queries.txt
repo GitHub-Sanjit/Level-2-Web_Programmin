@@ -1,0 +1,497 @@
+6-1 $match , $project aggregation stage=======================
+1.db.test.aggregate([])
+2.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male" } }
+])
+3.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male", age: { $lt: 30 } } }
+])
+4.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male", age: { $lt: 30 } } },
+    // stage-2
+    { $project: { name: 1, age: 1, gender: 1 } }
+])
+==============================================================
+
+6-2 $addFields , $out , $merge aggregation stage==============
+1.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male" } },
+    // stage-2
+    { $match: { age: { $lt: 30 } } },
+    // stage-3
+    { $project: { name: 1, age: 1, gender: 1 } }
+])
+2.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male" } },
+    // stage-2
+    { $addFields: { course: "Level-2" } }
+])
+3.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male" } },
+    // stage-2
+    { $addFields: { course: "Level-2" } },
+    // stage-3
+    { $project: { course: 1 } }
+])
+4.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male" } },
+    // stage-2 Cant modified original docs
+    { $addFields: { course: "Level-2", eduTech: "Programming Hero" } },
+    // stage-3
+    { $project: { course: 1, eduTech: 1 } }
+])
+5.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male" } },
+    // stage-2
+    { $addFields: { course: "Level-2", eduTech: "Programming Hero", monerMoto: "Moner Iccha" } },
+    // stage-3
+    { $project: { course: 1, eduTech: 1, monerMoto: 1 } }
+])
+6.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male" } },
+    // stage-2
+    { $addFields: { course: "Level-2", eduTech: "Programming Hero", monerMoto: "Moner Iccha" } },
+    // stage-3
+    { $project: { course: 1, eduTech: 1, monerMoto: 1 } },
+    // stage-4
+    { $out: "course_student" }
+])
+7.db.test.aggregate([
+    // stage-1
+    { $match: { gender: "Male" } },
+    // stage-2
+    { $addFields: { course: "Level-2", eduTech: "Programming Hero", monerMoto: "Moner Iccha" } },
+    // stage-3
+    { $project: { course: 1, eduTech: 1, monerMoto: 1 } },
+    // stage-4
+    { $merge: "test" }
+])
+8.db.test.aggregate([
+    // stage-1
+    // { $match: { gender: "Male" } },
+    // stage-2
+    { $addFields: { course: "Level-2", eduTech: "Programming Hero", monerMoto: "Moner Iccha" } },
+    // stage-3
+    { $project: { course: 1, eduTech: 1, monerMoto: 1 } },
+    // stage-4
+    { $merge: "test" }
+])
+==============================================================
+
+6-3 $group , $sum , $push aggregation stage===================
+1.db.test.aggregate([
+    // stage-1
+    { $group: { _id: "$gender" } }
+])
+2.db.test.aggregate([
+    // stage-1
+    { $group: { _id: "$address.country" } }
+])
+3.db.test.aggregate([
+    // stage-1
+    { $group: { _id: "$course" } }
+])
+4.db.test.aggregate([
+    // stage-1
+    { $group: { _id: "$age" } }
+])
+5.db.test.aggregate([
+    // stage-1
+    { $group: { _id: "$age", count: { $sum: 1 } } }
+])
+6.db.test.aggregate([
+    // stage-1
+    { $group: { _id: "$address.country", count: { $sum: 1 } } }
+])
+7.db.test.aggregate([
+    // stage-1
+    { $group: { _id: "$address.country", count: { $sum: 1 }, showName: { $push: "$name" } } }
+])
+8.db.test.aggregate([
+    // stage-1
+    {
+        $group: {
+            _id: "$address.country",
+            count: { $sum: 1 },
+            fullDoc : { $push: "$$ROOT" }
+        }
+    }
+])
+9.db.test.aggregate([
+    // stage-1
+    {
+        $group: {
+            _id: "$address.country",
+            count: { $sum: 1 },
+            fullDoc: { $push: "$$ROOT" }
+        }
+    },
+    // stage-2
+    {
+        $project: {
+            "fullDoc.name": 1,
+            "fullDoc.email": 1,
+            "fullDoc.phone": 1,
+        }
+    }
+])
+10.
+==============================================================
+
+6-4 explore more about $group & $project======================
+1.db.test.aggregate([
+    // stage-1
+    {
+        $group: {
+            _id: null,
+            totalSalary: {
+                $sum: "$salary"
+            }
+
+        }
+    }
+])
+2.db.test.aggregate([
+    // stage-1
+    {
+        $group: {
+            _id: null,
+            totalSalary: {
+                $sum: "$salary"
+            },
+            maxSalary: {
+                $max: "$salary"
+            },
+        }
+    }
+])
+3.db.test.aggregate([
+    // stage-1
+    {
+        $group: {
+            _id: null,
+            totalSalary: {
+                $sum: "$salary"
+            },
+            maxSalary: {
+                $max: "$salary"
+            },
+            minSalary: {
+                $min: "$salary"
+            },
+        }
+    }
+])
+4.db.test.aggregate([
+    // stage-1
+    {
+        $group: {
+            _id: null,
+            totalSalary: {
+                $sum: "$salary"
+            },
+            maxSalary: {
+                $max: "$salary"
+            },
+            minSalary: {
+                $min: "$salary"
+            },
+            avgSalary: {
+                $avg: "$salary"
+            },
+        }
+    }
+])
+5.db.test.aggregate([
+    // stage-1
+    {
+        $group: {
+            _id: null,
+            totalSalary: {
+                $sum: "$salary"
+            },
+            maxSalary: {
+                $max: "$salary"
+            },
+            minSalary: {
+                $min: "$salary"
+            },
+            avgSalary: {
+                $avg: "$salary"
+            },
+        }
+    },
+    // stage-2
+    {
+        $project: {
+            totalSalary: 1,
+            maxSalary: 1,
+            minSalary: 1,
+            averageSalary: "$avgSalary",
+            rangeBetweenMaxandMin: { $subtract: ["$maxSalary", "$minSalary"] }
+        }
+    }
+])
+==============================================================
+
+6-5 Explore $group with $unwind aggregation stage=============
+1.db.test.aggregate([
+    // stage-1
+    {
+        $group: { _id: "$friends" }
+    },
+    // stage-2
+
+])
+2.db.test.aggregate([
+    // stage-1
+    {
+        $unwind: "$friends"
+    },
+    // stage-2
+    {
+        $group: { _id: "$friends" }
+    },
+])
+3.db.test.aggregate([
+    // stage-1
+    {
+        $unwind: "$interests"
+    },
+    // stage-2
+    // {
+    //     $group: { _id: "$friends", count: { $sum: 1 } }
+    // },
+])
+4.db.test.aggregate([
+    // stage-1
+    {
+        $unwind: "$interests"
+    },
+    // stage-2
+    {
+        $group: { _id: "$age" }
+    },
+])
+5.db.test.aggregate([
+    // stage-1
+    {
+        $unwind: "$interests"
+    },
+    // stage-2
+    {
+        $group: { _id: "$age", interestsPerAge: { $push: "$interests" } }
+    },
+])
+==============================================================
+
+6-6 $bucket, $sort, and $limit aggregation stage==============
+1.db.test.aggregate([
+    // stage-1
+    {
+        $bucket: {
+            groupBy: "$age",
+            boundaries: [20, 40, 60, 80],
+            default: "Age More Than 80",
+            output: {
+                count: { $sum: 1 }
+            }
+        }
+    }
+])
+2.db.test.aggregate([
+    // stage-1
+    {
+        $bucket: {
+            groupBy: "$age",
+            boundaries: [20, 40, 60, 80],
+            default: "Age More Than 80",
+            output: {
+                count: { $sum: 1 },
+                karakaraAse: { $push: "$name" }
+            }
+        }
+    }
+])
+3.db.test.aggregate([
+    // stage-1
+    {
+        $bucket: {
+            groupBy: "$age",
+            boundaries: [20, 40, 60, 80],
+            default: "Age More Than 80",
+            output: {
+                count: { $sum: 1 },
+                karakaraAse: { $push: "$$ROOT" }
+            }
+        }
+    }
+])
+4.db.test.aggregate([
+    // stage-1
+    {
+        $bucket: {
+            groupBy: "$age",
+            boundaries: [20, 40, 60, 80],
+            default: "Age More Than 80",
+            output: {
+                count: { $sum: 1 },
+                karakaraAse: { $push: "$$ROOT" }
+            }
+        }
+    },
+    // stage-2
+    {
+        $sort: { count: -1 }
+    }
+])
+5.db.test.aggregate([
+    // stage-1
+    {
+        $bucket: {
+            groupBy: "$age",
+            boundaries: [20, 40, 60, 80],
+            default: "Age More Than 80",
+            output: {
+                count: { $sum: 1 },
+                karakaraAse: { $push: "$$ROOT" }
+            }
+        }
+    },
+    // stage-2
+    {
+        $sort: { count: -1 }
+    },
+    // stage-3
+    {
+        $project: {
+            count: 1
+        }
+    }
+])
+6.db.test.aggregate([
+    // stage-1
+    {
+        $bucket: {
+            groupBy: "$age",
+            boundaries: [20, 40, 60, 80],
+            default: "Age More Than 80",
+            output: {
+                count: { $sum: 1 },
+                karakaraAse: { $push: "$$ROOT" }
+            }
+        }
+    },
+    // stage-2
+    {
+        $sort: { count: -1 }
+    },
+    // stage-3
+    {
+        $limit: 2
+    },
+    // stage-4
+    {
+        $project: {
+            count: 1
+        }
+    }
+])
+==============================================================
+
+6-7 $facet, multiple pipeline aggregation stage===============
+1.db.test.aggregate([
+    {
+        $facet: {
+            // pipeline-1
+            "friendsCount": [
+                // stage-1
+                { $unwind: "$friends" },
+                // stage-2
+                { $group: { _id: "$friends", count: { $sum: 1 } } }
+            ]
+        }
+    }
+])
+2.db.test.aggregate([
+    {
+        $facet: {
+            // pipeline-1
+            "friendsCount": [
+                // stage-1
+                { $unwind: "$friends" },
+                // stage-2
+                { $group: { _id: "$friends", count: { $sum: 1 } } }
+            ],
+            // pipeline-2
+            "educationCount": [
+                // stage-1
+                { $unwind: "$education" },
+                // stage-2
+                { $group: { _id: "$education", count: { $sum: 1 } } }
+            ]
+        }
+    }
+])
+3.db.test.aggregate([
+    {
+        $facet: {
+            // pipeline-1
+            "friendsCount": [
+                // stage-1
+                { $unwind: "$friends" },
+                // stage-2
+                { $group: { _id: "$friends", count: { $sum: 1 } } }
+            ],
+            // pipeline-2
+            "educationCount": [
+                // stage-1
+                { $unwind: "$education" },
+                // stage-2
+                { $group: { _id: "$education", count: { $sum: 1 } } }
+            ],
+            // pipeline-3
+            "skillsCount": [
+                // stage-1
+                { $unwind: "$skills" },
+                // stage-2
+                { $group: { _id: "$skills", count: { $sum: 1 } } }
+            ]
+        }
+    }
+])
+4.
+==============================================================
+
+6-8 $lookup stage, embedding vs referencing.mp4======================
+1.db.orders.aggregate([
+    {
+        $lookup: {
+            from: "test",
+            localField: "userId",
+            foreignField: "_id",
+            as: "user"
+        }
+    }
+])
+=====================================================================
+
+6-9 What is indexing, COLLSCAN vs IXSCAN=============================
+1.db.getCollection("massive data").createIndex({ email: 1 })
+=====================================================================
+
+6-10 Explore compound index and text index===========================
+1.db.getCollection("massive data").dropIndex({ email: 1 })
+2.db.getCollection("massive data").createIndex({about:"text"})
+3.db.getCollection("massive data").find({$text: { $search: "dolor" }})
+4.db.getCollection("massive data").find({ $text: { $search: "dolor" } }).project({ about: 1 })
+=====================================================================
