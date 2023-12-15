@@ -1,13 +1,13 @@
-import './App.css'
-
-import Chicken from './Chicken'
+import Slots from "./Slots";
+import "./App.css";
 
 function App() {
-  return <div>
-    <Chicken></Chicken>
-    <Chicken></Chicken>
-    <Chicken></Chicken>
-  </div>
+  return (
+    <div>
+      <Slots val1="🍌" val2="🍌" val3="🍌" />
+      <Slots val1="🍌" val2="🍌f" val3="🍌" />
+    </div>
+  );
 }
 
-export default App
+export default App;
